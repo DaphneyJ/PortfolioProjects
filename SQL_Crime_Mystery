@@ -1,4 +1,4 @@
-- Solving Murder that occurred in SQL City on 1/15/ 2018
+-- Solving Murder that occurred in SQL City on 1/15/ 2018
 -- Full story can be found here (https://mystery.knightlab.com/ )
 
 SELECT *
@@ -6,9 +6,9 @@ FROM crime_scene_report
 WHERE city = 'SQL City' AND date = '20180115';
 
 -- Returns date, type, city, and description of all crimes that occured on that day 
---	Footage shows there are 2 witnesses. 
+-- Footage shows there are 2 witnesses. 
 -- The first witness lives at the last house on "Northwestern Dr"
---	The second witness, named Annabel, lives somewhere on "Franklin Ave".
+-- The second witness, named Annabel, lives somewhere on "Franklin Ave".
 
 
 SELECT *
@@ -17,26 +17,26 @@ WHERE address_street_name = 'Northwestern Dr'
 ORDER BY address_number DESC
 LIMIT 1;
 
-- Tracking down witness 1 and Finding all information on the witness using information from the report
-- Output: 14887	Morty Schapiro	118009	4919	Northwestern Dr	111564949
+-- Tracking down witness 1 and Finding all information on the witness using information from the report
+-- Output: 14887	Morty Schapiro	118009	4919	Northwestern Dr	111564949
 
 
 SELECT *
 FROM person
 WHERE address_street_name = 'Franklin Ave' AND name LIKE '%Annabel%';
 
-- Finding information on witness 2
-- Output: 16371	Annabel Miller	490173	103	Franklin Ave	318771143
+-- Finding information on witness 2
+-- Output: 16371	Annabel Miller	490173	103	Franklin Ave	318771143
 
 
 SELECT *
 FROM interview
 WHERE person_id = '14887' OR person_id = '16371';
 
-- Checked interview notes of both witnesses for more details 
-- Output: person_id	transcript
-- 14887	"I heard a gunshot and then saw a man run out. He had a Get Fit Now Gym bag. The membership number on the bag started with 48Z. Only gold members have those bags. The man got into a car with a plate that included H42W".
-- 16371	"I saw the murder happen, and I recognized the killer from my gym when I was working out last week on January the 9th".
+-- Checked interview notes of both witnesses for more details 
+-- Output: person_id	transcript
+-- 14887	"I heard a gunshot and then saw a man run out. He had a Get Fit Now Gym bag. The membership number on the bag started with 48Z. Only gold members have those bags. The man got into a car with a plate that included H42W".
+-- 16371	"I saw the murder happen, and I recognized the killer from my gym when I was working out last week on January the 9th".
 
 
 SELECT *
@@ -46,10 +46,10 @@ WHERE membership_id LIKE '48Z%'
   AND membership_status =  'gold'
 	AND check_in_date = '20180109';
 
-- Looked up the suspect by joining tables for all the information the witnesses provided 
-- Output: id	person_id	name	membership_start_date	membership_status	membership_id	check_in_date	check_in_time	check_out_time
-- 48Z7A	28819	Joe Germuska	20160305	gold	48Z7A	20180109	1600	1730
-- 48Z55	67318	Jeremy Bowers	20160101	gold	48Z55	20180109	1530	1700
+-- Looked up the suspect by joining tables for all the information the witnesses provided 
+-- Output: id	person_id	name	membership_start_date	membership_status	membership_id	check_in_date	check_in_time	check_out_time
+-- 48Z7A	28819	Joe Germuska	20160305	gold	48Z7A	20180109	1600	1730
+-- 48Z55	67318	Jeremy Bowers	20160101	gold	48Z55	20180109	1530	1700
 
 
 SELECT person.name, drivers_license
@@ -57,18 +57,18 @@ FROM drivers_license
 JOIN person ON drivers_license.id = person.license_id
 WHERE plate_number like '%H42W%' AND gender = 'male';
 
-- Witness mentioned suspects partial licensed plate. Match the license plate to either of the 2 suspects.
-- Output: name	id	age	height	eye_color	hair_color	gender	plate_number		car_make	car_model
-- Tushar Chandra	664760	21	71	black	black	male	4H42WR		Nissan	Altima
-- Jeremy Bowers	423327	30	70	brown	brown	male	0H42W2		Chevrolet	Spark LS
+-- Witness mentioned suspects partial licensed plate. Match the license plate to either of the 2 suspects.
+-- Output: name	id	age	height	eye_color	hair_color	gender	plate_number		car_make	car_model
+-- Tushar Chandra	664760	21	71	black	black	male	4H42WR		Nissan	Altima
+-- Jeremy Bowers	423327	30	70	brown	brown	male	0H42W2		Chevrolet	Spark LS
 
 
 SELECT transcript, name
 FROM interview
 JOIN person ON interview.person_id = person.id
 WHERE name = 'Jeremy Bowers';
-- Jeremy is the killer. In the next step I will find out the murder motive by looking up Jeremy’s interview. 
-- Output: transcript	name "I was hired by a woman with a lot of money. I don't know her name but I know she's around 5'5" (65") or 5'7" (67"). She has red hair and she drives a Tesla Model S. I know that she attended the SQL Symphony Concert 3 times in December 2017".	Jeremy Bowers
+-- Jeremy is the killer. In the next step I will find out the murder motive by looking up Jeremy’s interview. 
+-- Output: transcript	name "I was hired by a woman with a lot of money. I don't know her name but I know she's around 5'5" (65") or 5'7" (67"). She has red hair and she drives a Tesla Model S. I know that she attended the SQL Symphony Concert 3 times in December 2017".	Jeremy Bowers
 
 
 SELECT person.id, name, height, hair_color, ssn, car_model
@@ -79,11 +79,11 @@ WHERE height BETWEEN 65 AND 67
 	AND car_make = 'Tesla'
 	AND car_model = 'Model S'
 
-- Searched the description of the woman Jeremy implicated in his interview
-- Output: id	name	height	hair_color	ssn	car_model
-- 78881	Red Korb	65	red	961388910	Model S
-- 90700	Regina George	66	red	337169072	Model S
-- 99716	Miranda Priestly	66	red	987756388	Model S
+-- Searched the description of the woman Jeremy implicated in his interview
+-- Output: id	name	height	hair_color	ssn	car_model
+-- 78881	Red Korb	65	red	961388910	Model S
+-- 90700	Regina George	66	red	337169072	Model S
+-- 99716	Miranda Priestly	66	red	987756388	Model S
 
 
 SELECT name
@@ -95,5 +95,6 @@ WHERE event_name LIKE 'SQL Symphony Concert'
 	OR ssn = '337169072'
 	OR ssn = '987756388'
 GROUP BY name;
-- Output: name: Miranda Priestly
-- Miranda Priestly was the mastermind behind the crime. 
+
+-- Output: name: Miranda Priestly
+-- Miranda Priestly was the mastermind of the crime. 
